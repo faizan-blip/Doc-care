@@ -17,6 +17,10 @@ const patschema = new mongoose.Schema({
          confirmpassword:{
             type:String,
             required:true
+         },
+         createdAt:{
+            type:Date,
+            default:Date.now()
          }
     },
     profile_data:{
@@ -32,6 +36,9 @@ const patschema = new mongoose.Schema({
             type:Number,
             required:true
          },
+         updatedAt:{
+            type:Date,
+         }
     },
     patient_history:{
         admit_date:{
@@ -49,7 +56,6 @@ const patschema = new mongoose.Schema({
         assigned_doctor:{
             type:mongoose.Schema.Types.ObjectId,
             ref:'doc',
-            required:true
         },
     }
 })
