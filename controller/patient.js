@@ -179,3 +179,11 @@ exports.createpatappoint = async(req,res)=>{
            })  
     }
 }
+
+exports.patlinkpassword = async(req,res)=>{
+
+}
+
+exports.patresetpassword = async(req,res)=>{
+
+}

@@ -180,3 +180,11 @@ exports.getappoint = async (req, res) => {
         });
     }
 };
+
+exports.doclinkpassword = async(req,res)=>{
+
+}
+
+exports.docresetpassword = async(req,res)=>{
+
+}
