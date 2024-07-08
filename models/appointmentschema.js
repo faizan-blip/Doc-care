@@ -10,6 +10,11 @@ const appointschema = new mongoose.Schema({
       type: Date,
       required: true
   },
+  doctor_assigned:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'doc',
+    required:true
+  }
   })
   
 module.exports = mongoose.model('appoint' , appointschema)

@@ -1,4 +1,5 @@
 const appointmentschema = require("../models/appointmentschema");
+const doctorschema = require("../models/doctorschema");
 const patientschema = require("../models/patientschema");
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
@@ -101,13 +102,20 @@ exports.patlogin = async(req , res)=>{
     const token = req.headers.authorization?.split(' ')[1]
     const {username} = req.body;
     try{
-        const patexist = await patientschema.find({token , user_data:username})
-        if(patexist){
-            res.status(200).json({
-                success:true,
-                message:"Patient found!!"
+        const patexist = await patientschema.findOne({_id:token , 'user_data.username':username})
+        
+        if(!patexist){
+           return res.status(400).json({
+                success:false,
+                message:"Patient Not Registered!!"
                })  
         }
+
+        res.status(200).json({
+            success:true,
+            message:"Patient found!!"
+           })
+
     }catch(error){
         res.status(400).json({
             success:false,
@@ -139,22 +147,31 @@ exports.putpat = async(req,res)=>{
 
 exports.createpatappoint = async(req,res)=>{
     const token = req.headers.authorization?.split(' ')[1]
-    const {appointment_date ,docusername} = req.body;
-    try{
-        const appointexist = await appointmentschema.findOne({token})
-        if(appointexist){
-            res.status(400).json({
-                success:false,
-                message:"Sorry Patient , Your appointment already exist"
-               })  
+    const {appointment_date , patientusername,docusername } = req.body;
+    try {
+        const patient = await patientschema.findOne({ 'user_data.username': patientusername });
+       const doctor = await doctorschema.findOne({'user_data.username': docusername})
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                message: "Patient not found"
+            });
         }
-       const appointdata = await appointmentschema.create({appointment_date:appointment_date , Patient:docusername , token})
-       res.status(200).json({
-        success:true,
-        data:appointdata,
-        token:token,
-        message:"Wow Patient!! You Got appointed"
-       })  
+
+        // Create the appointment
+        const appointdata = await appointmentschema.create({
+            appointment_date: appointment_date,
+            Patient: patient._id,
+           doctor_assigned: doctor._id,
+            token: token
+        });
+
+        res.status(200).json({
+            success: true,
+            data: appointdata,
+            token: token,
+            message: "Your Appointment created"
+        });
     }catch(error){
         res.status(400).json({
             success:false,

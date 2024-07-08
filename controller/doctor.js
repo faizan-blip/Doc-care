@@ -101,14 +101,18 @@ exports.doclogin = async(req , res)=>{
 exports.getdoc = async(req,res)=>{
     const token = req.headers.authorization?.split(' ')[1]
     try{
-        const docexist = await doctorschema.findOne({token})
+        const docexist = await doctorschema.findOne({_id:token})
         console.log(token , docexist);
-        if(docexist){
-            res.status(200).json({
+        if(!docexist){
+           return res.status(400).json({
                 success:true,
-                message:"Doc found!!"
+                message:"Doc not found!!"
                })  
         }
+        res.status(200).json({
+            success:true,
+            message:"Doc found!!"
+           })  
     }catch(error){
         res.status(400).json({
             success:false,
@@ -145,26 +149,34 @@ exports.putdoc = async(req,res)=>{
    
 }
 
-exports.getappoint = async(req,res)=>{
-    const token = req.headers.authorization?.split(' ')[1]
-    if(!token){
+exports.getappoint = async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    try {
+        const doctor = await doctorschema.findOne({ _id: token });
+        if (!doctor) {
+            return res.status(404).json({
+                success: false,
+                message: "Doctor not found"
+            });
+        }
+
+        const patientappointment = await appointmentschema.find({ doctor_assigned: doctor._id });
+        if (!patientappointment || patientappointment.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No Appointments for today"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: patientappointment,
+            message: "Doc !! You are going to be busy now.."
+        });
+    } catch (error) {
         res.status(400).json({
             success: false,
-            message: 'No appointment is there for today'
+            message: error.message
         });
     }
-    try{
-        const patientappointment = await appointmentschema.find({token })
-        res.status(200).json({
-            success:true,
-            data:patientappointment,
-            message:"Doc !! You are Going to busy now.."
-           })  
-    }catch(error){
-        res.status(400).json({
-            success:false,
-            message:error.message
-           })  
-    }
-
-}
+};

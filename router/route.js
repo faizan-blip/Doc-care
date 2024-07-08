@@ -15,6 +15,6 @@ router.post("/patregister" , patregister)
 router.post("/patlogin" , patlogin)
 router.get("/getpat" , getpat)
 router.put("/updatepat/:id" , putpat)
-router.get("/createappoint" , createpatappoint)
+router.post("/createappoint" , createpatappoint)
 
 module.exports = router
