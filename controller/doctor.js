@@ -2,6 +2,7 @@ const doctorschema = require("../models/doctorschema");
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const appointmentschema = require("../models/appointmentschema");
+const { resetmessage } = require("./resetmessage");
 require("dotenv").config()
 
 exports.docregistration = async (req, res) => {
@@ -182,9 +183,96 @@ exports.getappoint = async (req, res) => {
 };
 
 exports.doclinkpassword = async(req,res)=>{
-
+     const {mobile} = req.body;
+     try{
+        const mobiledata = await doctorschema.findOne({"profile_data.mobile":mobile})
+        if(!mobiledata){
+         return   res.status(400).json({
+                success: false,
+                message: "Doc Doesn't exist with this Mobile Number."
+            });
+        }
+   const payload = {
+    mobile: mobiledata.profile_data.mobile,
+    id:mobiledata._id
+   }
+   const token = jwt.sign(payload ,process.env.JWT_SEC  , {
+    expiresIn:"15m"
+})
+const link = `http://localhost:4000/api/resetpassword${mobiledata._id}/${token}`
+console.log(link);
+await resetmessage(link , mobile)
+res.status(200).json({
+    success: true,
+    data: link,
+    message: "Reset Link Send Successfully!!"
+})
+     } catch(error){
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+     }
 }
 
 exports.docresetpassword = async(req,res)=>{
+    const { id, token } = req.params;
+    const { password, confirmpassword } = req.body;
 
+    try {
+        // Check if passwords match
+        if (!password || !confirmpassword || password !== confirmpassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Passwords do not match or are not provided."
+            });
+        }
+
+        const doctor = await doctorschema.findOne({ _id: id });
+        if (!doctor) {
+            return res.status(400).json({
+                success: false,
+                message: "Doc doesn't exist"
+            });
+        }
+
+        jwt.verify(token, process.env.JWT_SEC , function(err, decoded) {
+            console.log(decoded.id)
+            if (err) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid or expired token."
+                });
+            }
+            if(decoded.id != doctor.id){
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid Link"
+                });
+            }
+          }); 
+
+          const isCurrentPassword = await bcrypt.compare(password,doctor.user_data.password );
+
+          if (isCurrentPassword) {
+            return res.status(409).json({
+              status: false,
+              message: 'Cannot use the current password.',
+            });
+          }
+          const hashpassword = await bcrypt.hash(password, 10);
+
+          const update = await doctorschema.findByIdAndUpdate({_id:id , token},{user_data:{password:hashpassword}})
+           res.status(200).json({
+            success: true,
+    data: update,
+    message: "Password Reset Successfully"
+           })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 }
