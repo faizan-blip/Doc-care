@@ -260,7 +260,9 @@ exports.patresetpassword = async (req, res) => {
           }
           const hashpassword = await bcrypt.hash(password, 10);
 
-          const update = await patientschema.findByIdAndUpdate({_id:id , token},{user_data:{password:hashpassword}})
+          const update = await patientschema.findByIdAndUpdate( { _id: id },
+            { $set: { "user_data.password": hashpassword } },
+            { new: true })
            res.status(200).json({
             success: true,
     data: update,

@@ -199,7 +199,7 @@ exports.doclinkpassword = async(req,res)=>{
    const token = jwt.sign(payload ,process.env.JWT_SEC  , {
     expiresIn:"15m"
 })
-const link = `http://localhost:4000/api/resetpassword${mobiledata._id}/${token}`
+const link = `http://localhost:4000/api/resetpassword/${mobiledata._id}/${token}`
 console.log(link);
 await resetmessage(link , mobile)
 res.status(200).json({
@@ -262,7 +262,11 @@ exports.docresetpassword = async(req,res)=>{
           }
           const hashpassword = await bcrypt.hash(password, 10);
 
-          const update = await doctorschema.findByIdAndUpdate({_id:id , token},{user_data:{password:hashpassword}})
+          const update = await doctorschema.findByIdAndUpdate(
+            { _id: id },
+            { $set: { "user_data.password": hashpassword } },
+            { new: true } 
+        );
            res.status(200).json({
             success: true,
     data: update,
