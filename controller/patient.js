@@ -4,9 +4,9 @@ const doctorschema = require("../models/doctorschema");
 const patientschema = require("../models/patientschema");
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
-const stripe = require('stripe')('sk_test_51PVxubIEi8dQhGZq0v1dF4cwVtclNva0VdyNKrMHdm1fQpYSNuq1U1Saf4YCOMM1qY31Rmfcxy2siEtXLrAmtQIV004G2Gq0bz')
-require('dotenv').config();
 
+require('dotenv').config();
+const stripe = require('stripe')(process.env.Stripe_Sec)
 exports.patregister = async (req, res) => {
     const { username, Name, password, confirmpassword, age, address, mobile } = req.body;
 
