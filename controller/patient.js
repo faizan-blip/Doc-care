@@ -291,6 +291,9 @@ exports.payment = async(req,res)=>{
                 message: 'Invalid Payment'
             });
          }
+            const customer = await stripe.customers.create({
+                name: patient.user_data.Name
+            })
          const latestAppoinment = await appointmentschema.findOne({Patient:patient._id})
          if(!latestAppoinment){
             return  res.status(500).json({
@@ -298,10 +301,11 @@ exports.payment = async(req,res)=>{
                  message: 'No appointment found for the patient'
             });
          }
+      
          const paymentIntent = await stripe.paymentIntents.create({
             amount: latestAppoinment.amount,
             currency: 'USD',
-            customer: patient._id.toString(),
+            customer: customer._id,
             description: `Appointment with ${latestAppoinment.docname}`,
             metadata: {
                 appointment_id: latestAppoinment._id.toString(),

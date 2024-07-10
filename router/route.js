@@ -18,6 +18,6 @@ router.post("/patlogin" , patlogin)
 router.get("/getpat" , getpat)
 router.put("/updatepat/:id" , putpat)
 router.post("/createappoint" , createpatappoint)
-router.post("/payment" , payment)
+router.post("/payment/:id" , payment)
 
 module.exports = router
