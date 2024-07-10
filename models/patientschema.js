@@ -41,8 +41,8 @@ const patschema = new mongoose.Schema({
          }
     },
     patient_history:{
-        admit_date:{
-            type:Date,
+        amount:{
+            type:Number,
         },
         symptomps:{
             type:String,

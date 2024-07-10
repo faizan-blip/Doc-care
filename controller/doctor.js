@@ -6,9 +6,9 @@ const { resetmessage } = require("./resetmessage");
 require("dotenv").config()
 
 exports.docregistration = async (req, res) => {
-    const { username, Name, password, confirmpassword, department, address, mobile } = req.body;
+    const { username, Name, password, confirmpassword, department, address, mobile,feeamount } = req.body;
 
-    if (!username || !Name || !password || !confirmpassword || !department || !address || !mobile) {
+    if (!username || !Name || !password || !confirmpassword || !department || !address || !mobile || !feeamount) {
         return res.status(400).json({
             success: false,
             message: "All fields are required"
@@ -43,7 +43,8 @@ exports.docregistration = async (req, res) => {
             profile_data: {
                 department,
                 address,
-                mobile
+                mobile,
+                feeamount
             }
         });
 

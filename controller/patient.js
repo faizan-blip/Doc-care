@@ -1,8 +1,10 @@
+
 const appointmentschema = require("../models/appointmentschema");
 const doctorschema = require("../models/doctorschema");
 const patientschema = require("../models/patientschema");
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
+const stripe = require('stripe')('sk_test_51PVxubIEi8dQhGZq0v1dF4cwVtclNva0VdyNKrMHdm1fQpYSNuq1U1Saf4YCOMM1qY31Rmfcxy2siEtXLrAmtQIV004G2Gq0bz')
 require('dotenv').config();
 
 exports.patregister = async (req, res) => {
@@ -163,7 +165,9 @@ exports.createpatappoint = async(req,res)=>{
             appointment_date: appointment_date,
             Patient: patient._id,
            doctor_assigned: doctor._id,
-            token: token
+           amount:doctor.profile_data.feeamount,
+           docname:doctor.user_data.Name,
+            token: token,
         });
 
         res.status(200).json({
@@ -276,3 +280,45 @@ exports.patresetpassword = async (req, res) => {
         });
     }
 };
+
+exports.payment = async(req,res)=>{
+    const {id} = req.params
+    try{
+         const patient = await patientschema.findOne({_id:id})
+         if(!patient){
+         return  res.status(500).json({
+                success: false,
+                message: 'Invalid Payment'
+            });
+         }
+         const latestAppoinment = await appointmentschema.findOne({Patient:patient._id})
+         if(!latestAppoinment){
+            return  res.status(500).json({
+                success: false,
+                 message: 'No appointment found for the patient'
+            });
+         }
+         const paymentIntent = await stripe.paymentIntents.create({
+            amount: latestAppoinment.amount,
+            currency: 'USD',
+            customer: patient._id.toString(),
+            description: `Appointment with ${latestAppoinment.docname}`,
+            metadata: {
+                appointment_id: latestAppoinment._id.toString(),
+                patient_id: latestAppoinment.Patient.toString(),
+                doctor_id: latestAppoinment.doctor_assigned.toString(),
+                appointment_date: latestAppoinment.appointment_date.toISOString()
+            }
+        });
+        res.status(200).json({
+            success: true,
+            paymentIntent: paymentIntent,
+            message: "Payment intent created successfully"
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}

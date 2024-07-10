@@ -3,7 +3,7 @@ const router = express.Router()
 
 
 const {docregistration,doclogin,getdoc,putdoc,getappoint,doclinkpassword,docresetpassword} = require('../controller/doctor')
-const {patregister,patlogin,getpat,putpat,createpatappoint} = require('../controller/patient')
+const {patregister,patlogin,getpat,putpat,createpatappoint,payment} = require('../controller/patient')
 
 router.post("/docregister" , docregistration)
 router.post("/doclogin" , doclogin)
@@ -18,5 +18,6 @@ router.post("/patlogin" , patlogin)
 router.get("/getpat" , getpat)
 router.put("/updatepat/:id" , putpat)
 router.post("/createappoint" , createpatappoint)
+router.post("/payment" , payment)
 
 module.exports = router

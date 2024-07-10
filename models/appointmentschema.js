@@ -14,6 +14,12 @@ const appointschema = new mongoose.Schema({
     type:mongoose.Schema.Types.ObjectId,
     ref:'doc',
     required:true
+  },
+  docname:{
+    type:String,
+  },
+  amount:{
+    type:Number,
   }
   })
   

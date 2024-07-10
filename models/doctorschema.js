@@ -37,6 +37,10 @@ const docschema = new mongoose.Schema({
             type:Number,
             required:true
          },
+         feeamount:{
+            type:Number,
+            required:true
+         },
          updatedAt:{
             type:Date,
          }
